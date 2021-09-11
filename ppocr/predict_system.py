@@ -11,20 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
-import sys
+import copy
+import logging
 from typing import List
 
 import cv2
-import copy
 import numpy as np
-from PIL import Image
-from rec import TextRecognizer
-from det import TextDetector
-from cls import TextClassifier
-from utility import draw_ocr_box_txt
-import logging
 
+from .cls import TextClassifier
+from .det import TextDetector
+from .rec import TextRecognizer
 
 logger = logging.getLogger()
 
@@ -136,6 +132,3 @@ def sorted_boxes(dt_boxes):
             _boxes[i] = _boxes[i + 1]
             _boxes[i + 1] = tmp
     return _boxes
-
-
-
