@@ -20,11 +20,12 @@ import time
 
 import onnxruntime as ort
 import logging
+from ppocr.utility import get_model_data
 from .preprocess import preprocess_op
 from .postprocess import DBPostProcess
 
 logger = logging
-det_model_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'ch_PP-OCRv2_det_infer.onnx')
+model_file = 'ch_PP-OCRv2_det_infer.onnx'
 
 
 def draw_text_det_res(dt_boxes, img):
@@ -53,7 +54,7 @@ class TextDetector(object):
         self.preprocess_op = preprocess_op
         self.postprocess_op = DBPostProcess(thresh=0.3, box_thresh=0.5, max_candidates=1000, unclip_ratio=1.6,
                                             use_dilation=True)
-        sess = ort.InferenceSession(det_model_path)
+        sess = ort.InferenceSession(get_model_data(model_file))
         self.output_tensors = None
         self.predictor, self.input_tensor = sess, sess.get_inputs()[0]
 

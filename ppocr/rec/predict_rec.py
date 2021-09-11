@@ -13,18 +13,18 @@
 # limitations under the License.
 import logging
 import math
-import os
 import time
 
 import cv2
 import numpy as np
 import onnxruntime as ort
 
+from ppocr.utility import get_model_data, get_character_dict_path
 from .rec_decoder import CTCLabelDecode
 
 logger = logging
-character_dict_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'ppocr_keys_v1.txt')
-rec_model_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'rec-model.onnx')
+character_dict_path = get_character_dict_path()
+rec_model_file = 'rec-model.onnx'
 
 
 class TextRecognizer(object):
@@ -35,7 +35,7 @@ class TextRecognizer(object):
         self.rec_algorithm = 'CRNN'
         self.postprocess_op = CTCLabelDecode(character_dict_path=character_dict_path,
                                              character_type='ch', use_space_char=True)
-        sess = ort.InferenceSession(rec_model_path)
+        sess = ort.InferenceSession(get_model_data(rec_model_file))
         self.predictor, self.input_tensor = sess, sess.get_inputs()[0]
         self.output_tensors = None
 

@@ -14,17 +14,16 @@
 import copy
 import logging
 import math
-import os
 import time
 
 import cv2
 import numpy as np
 import onnxruntime as ort
-
+from ppocr.utility import get_model_data
 from .postprocess import ClsPostProcess
 
 logger = logging
-cls_model_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'cls-model.onnx')
+model_file = 'cls-model.onnx'
 
 
 class TextClassifier(object):
@@ -34,7 +33,7 @@ class TextClassifier(object):
         self.cls_thresh = cls_thresh
         self.postprocess_op = ClsPostProcess(label_list=label_list)
         self.output_tensors = None
-        sess = ort.InferenceSession(cls_model_path)
+        sess = ort.InferenceSession(get_model_data(model_file))
         self.predictor, self.input_tensor = sess, sess.get_inputs()[0]
 
     def resize_norm_img(self, img):

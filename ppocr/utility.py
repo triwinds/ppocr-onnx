@@ -11,102 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import argparse
 import os
-import sys
 import cv2
 import numpy as np
 import json
 from PIL import Image, ImageDraw, ImageFont
 import math
-import onnxruntime as ort
+import requests
+import logging
 
 
-def parse_args():
-    def str2bool(v):
-        return v.lower() in ("true", "t", "1")
-
-    parser = argparse.ArgumentParser()
-    # params for prediction engine
-    parser.add_argument("--use_gpu", type=str2bool, default=True)
-    parser.add_argument("--ir_optim", type=str2bool, default=True)
-    parser.add_argument("--use_tensorrt", type=str2bool, default=False)
-    parser.add_argument("--use_fp16", type=str2bool, default=False)
-    parser.add_argument("--gpu_mem", type=int, default=500)
-
-    # params for text detector
-    parser.add_argument("--image_dir", type=str)
-    parser.add_argument("--det_algorithm", type=str, default='DB')
-    parser.add_argument("--det_model_dir", type=str)
-    parser.add_argument("--det_limit_side_len", type=float, default=960)
-    parser.add_argument("--det_limit_type", type=str, default='max')
-
-    # DB parmas
-    parser.add_argument("--det_db_thresh", type=float, default=0.3)
-    parser.add_argument("--det_db_box_thresh", type=float, default=0.5)
-    parser.add_argument("--det_db_unclip_ratio", type=float, default=1.6)
-    parser.add_argument("--max_batch_size", type=int, default=10)
-    # EAST parmas
-    parser.add_argument("--det_east_score_thresh", type=float, default=0.8)
-    parser.add_argument("--det_east_cover_thresh", type=float, default=0.1)
-    parser.add_argument("--det_east_nms_thresh", type=float, default=0.2)
-
-    # SAST parmas
-    parser.add_argument("--det_sast_score_thresh", type=float, default=0.5)
-    parser.add_argument("--det_sast_nms_thresh", type=float, default=0.2)
-    parser.add_argument("--det_sast_polygon", type=bool, default=False)
-
-    # params for text recognizer
-    parser.add_argument("--rec_algorithm", type=str, default='CRNN')
-    parser.add_argument("--rec_model_dir", type=str)
-    parser.add_argument("--rec_image_shape", type=str, default="3, 32, 320")
-    parser.add_argument("--rec_char_type", type=str, default='ch')
-    parser.add_argument("--rec_batch_num", type=int, default=6)
-    parser.add_argument("--max_text_length", type=int, default=25)
-    parser.add_argument(
-        "--rec_char_dict_path",
-        type=str,
-        default="./ppocr/utils/ppocr_keys_v1.txt")
-    parser.add_argument("--use_space_char", type=str2bool, default=True)
-    parser.add_argument(
-        "--vis_font_path", type=str, default="./doc/simfang.ttf")
-    parser.add_argument("--drop_score", type=float, default=0.5)
-
-    # params for text classifier
-    parser.add_argument("--use_angle_cls", type=str2bool, default=False)
-    parser.add_argument("--cls_model_dir", type=str)
-    parser.add_argument("--cls_image_shape", type=str, default="3, 48, 192")
-    parser.add_argument("--label_list", type=list, default=['0', '180'])
-    parser.add_argument("--cls_batch_num", type=int, default=6)
-    parser.add_argument("--cls_thresh", type=float, default=0.9)
-
-    parser.add_argument("--enable_mkldnn", type=str2bool, default=False)
-    parser.add_argument("--use_pdserving", type=str2bool, default=False)
-
-    return parser.parse_args()
-
-
-def create_predictor(args, mode, logger):
-    if mode == "det":
-        model_dir = args.det_model_dir
-    elif mode == 'cls':
-        model_dir = args.cls_model_dir
-    else:
-        model_dir = args.rec_model_dir
-
-    if model_dir is None:
-        logger.info("not find {} model file path {}".format(mode, model_dir))
-        sys.exit(0)
-    model_file_path = model_dir
-
-    if not os.path.exists(model_file_path):
-        logger.info("not find model file path {}".format(model_file_path))
-        sys.exit(0)
-
-    sess = ort.InferenceSession(model_file_path)
-
-    return sess, sess.get_inputs()[0], None
+data_root = os.path.join(os.getenv('APPDATA'), 'ppocr_onnx')
+if not os.path.exists(data_root):
+    os.mkdir(data_root)
 
 
 def draw_text_det_res(dt_boxes, img_path):
@@ -350,23 +267,25 @@ def draw_boxes(image, boxes, scores=None, drop_score=0.5):
     return image
 
 
-if __name__ == '__main__':
-    test_img = "./doc/test_v2"
-    predict_txt = "./doc/predict.txt"
-    f = open(predict_txt, 'r')
-    data = f.readlines()
-    img_path, anno = data[0].strip().split('\t')
-    img_name = os.path.basename(img_path)
-    img_path = os.path.join(test_img, img_name)
-    image = Image.open(img_path)
+def get_model_data(model_filename):
+    model_path = os.path.join(data_root, model_filename)
+    if not os.path.exists(model_path):
+        download_model(model_path, model_filename)
+    with open(model_path, 'rb') as f:
+        return f.read()
 
-    data = json.loads(anno)
-    boxes, txts, scores = [], [], []
-    for dic in data:
-        boxes.append(dic['points'])
-        txts.append(dic['transcription'])
-        scores.append(round(dic['scores'], 3))
 
-    new_img = draw_ocr(image, boxes, txts, scores)
+def download_model(model_path, model_filename):
+    logging.info(f'download model to {model_path}')
+    resp = requests.get(f'https://raw.fastgit.org/triwinds/ppocr-onnx/main/model/{model_filename}')
+    with open(model_path, 'wb') as f:
+        f.write(resp.content)
 
-    cv2.imwrite(img_name, new_img)
+
+def get_character_dict_path():
+    filepath = os.path.join(data_root, 'ppocr_keys_v1.txt')
+    if not os.path.exists(filepath):
+        resp = requests.get('https://raw.fastgit.org/triwinds/ppocr-onnx/main/model/ppocr_keys_v1.txt')
+        with open(filepath, 'wb') as f:
+            f.write(resp.content)
+    return filepath
