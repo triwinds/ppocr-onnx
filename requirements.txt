@@ -1,0 +1,7 @@
+onnxruntime
+numpy
+opencv-python
+shapely
+pyclipper
+pillow
+requests

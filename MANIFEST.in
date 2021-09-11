@@ -1,0 +1,10 @@
+include *.in
+include *.ini
+include *.rst
+include *.txt
+include LICENSE
+
+global-include *.onnx
+
+global-exclude __pycache__ *.py[cod]
+global-exclude *.so *.dylib
