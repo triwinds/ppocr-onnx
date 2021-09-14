@@ -21,7 +21,6 @@ import numpy as np
 from .cls import TextClassifier
 from .det import TextDetector
 from .rec import TextRecognizer
-from paddleocr.ppocr.data import create_operators
 
 
 logger = logging
