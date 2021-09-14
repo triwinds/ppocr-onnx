@@ -19,7 +19,7 @@ import time
 import cv2
 import numpy as np
 import onnxruntime as ort
-from ppocr.utility import get_model_data
+from ppocronnx.utility import get_model_data
 from .postprocess import ClsPostProcess
 
 logger = logging

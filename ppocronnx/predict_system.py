@@ -21,6 +21,7 @@ import numpy as np
 from .cls import TextClassifier
 from .det import TextDetector
 from .rec import TextRecognizer
+from paddleocr.ppocr.data import create_operators
 
 logger = logging.getLogger()
 
@@ -94,6 +95,7 @@ class TextSystem(object):
         logger.info("rec_res num  : {}, elapse : {}".format(len(rec_res), elapse))
         res = []
         for box, rec_reuslt, img_crop in zip(dt_boxes, rec_res, img_crop_list):
+            print(box)
             text, score = rec_reuslt
             if score >= drop_score:
                 res.append(BoxedResult(box, img_crop, text, score))

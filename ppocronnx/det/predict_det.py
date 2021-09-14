@@ -20,7 +20,7 @@ import time
 
 import onnxruntime as ort
 import logging
-from ppocr.utility import get_model_data
+from ppocronnx.utility import get_model_data
 from .preprocess import preprocess_op
 from .postprocess import DBPostProcess
 
@@ -52,7 +52,7 @@ class TextDetector(object):
         self.det_algorithm = 'DB'
 
         self.preprocess_op = preprocess_op
-        self.postprocess_op = DBPostProcess(thresh=0.3, box_thresh=0.5, max_candidates=1000, unclip_ratio=1.6,
+        self.postprocess_op = DBPostProcess(thresh=0.3, box_thresh=0.6, max_candidates=1000, unclip_ratio=1.5,
                                             use_dilation=True)
         sess = ort.InferenceSession(get_model_data(model_file))
         self.output_tensors = None

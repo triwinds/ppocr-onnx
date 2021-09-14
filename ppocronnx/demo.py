@@ -1,9 +1,9 @@
-from ppocr.predict_system import TextSystem
+from ppocronnx.predict_system import TextSystem
 import cv2
 import logging
 import sys
 from PIL import Image
-from ppocr.utility import draw_ocr_box_txt
+from ppocronnx.utility import draw_ocr_box_txt
 
 
 def main():
@@ -30,5 +30,5 @@ def main():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     main()

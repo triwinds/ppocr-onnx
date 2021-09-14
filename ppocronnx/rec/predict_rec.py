@@ -19,7 +19,7 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 
-from ppocr.utility import get_model_data, get_character_dict_path
+from ppocronnx.utility import get_model_data, get_character_dict_path
 from .rec_decoder import CTCLabelDecode
 
 logger = logging
