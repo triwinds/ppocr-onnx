@@ -11,17 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
+import math
 import os
+
 import cv2
 import numpy as np
-import json
-from PIL import Image, ImageDraw, ImageFont
-import math
 import requests
-import logging
+from PIL import Image, ImageDraw, ImageFont
 
-
-data_root = os.path.join(os.getenv('APPDATA'), 'ppocr_onnx')
+if os.name == 'nt':
+    data_root = os.path.join(os.getenv('APPDATA'), 'ppocr_onnx')
+else:
+    data_root = os.path.expanduser('~/.ppocr_onnx')
 if not os.path.exists(data_root):
     os.mkdir(data_root)
 
