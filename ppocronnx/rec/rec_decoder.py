@@ -6,7 +6,7 @@ class BaseRecLabelDecode(object):
     """ Convert between text-label and text-index """
 
     def __init__(self,
-                 character_dict_path=None,
+                 character_dict=None,
                  character_type='ch',
                  use_space_char=False):
         support_character_type = [
@@ -30,13 +30,9 @@ class BaseRecLabelDecode(object):
             dict_character = list(self.character_str)
         elif character_type in support_character_type:
             self.character_str = []
-            assert character_dict_path is not None, "character_dict_path should not be None when character_type is {}".format(
+            assert character_dict is not None, "character_dict_path should not be None when character_type is {}".format(
                 character_type)
-            with open(character_dict_path, "rb") as fin:
-                lines = fin.readlines()
-                for line in lines:
-                    line = line.decode('utf-8').strip("\n").strip("\r\n")
-                    self.character_str.append(line)
+            self.character_str.extend(character_dict)
             if use_space_char:
                 self.character_str.append(" ")
             dict_character = list(self.character_str)
@@ -76,7 +72,7 @@ class BaseRecLabelDecode(object):
                 else:
                     conf_list.append(1)
             text = ''.join(char_list)
-            result_list.append((text, np.mean(conf_list)))
+            result_list.append((text, np.mean(conf_list) if conf_list else np.nan))
         return result_list
 
     def get_ignored_tokens(self):
@@ -87,11 +83,11 @@ class CTCLabelDecode(BaseRecLabelDecode):
     """ Convert between text-label and text-index """
 
     def __init__(self,
-                 character_dict_path=None,
+                 character_dict=None,
                  character_type='ch',
                  use_space_char=False,
                  **kwargs):
-        super(CTCLabelDecode, self).__init__(character_dict_path,
+        super(CTCLabelDecode, self).__init__(character_dict,
                                              character_type, use_space_char)
 
     def __call__(self, preds, label=None, *args, **kwargs):
