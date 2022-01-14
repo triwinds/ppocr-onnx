@@ -59,6 +59,9 @@ class TextRecognizer(object):
         padding_im[:, :, 0:resized_w] = resized_image
         return padding_im
 
+    def set_char_whitelist(self, chars):
+        self.postprocess_op.set_char_mask(chars)
+
     def __call__(self, img_list):
         img_num = len(img_list)
         # Calculate the aspect ratio of all text bars
