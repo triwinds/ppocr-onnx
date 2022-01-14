@@ -13,7 +13,7 @@
 # limitations under the License.
 import copy
 import logging
-from typing import List
+from typing import Iterable, List, Optional
 
 import cv2
 import numpy as np
@@ -67,6 +67,9 @@ class TextSystem(object):
         self.use_angle_cls = use_angle_cls
         if self.use_angle_cls:
             self.text_classifier = TextClassifier()
+
+    def set_char_whitelist(self, chars: Optional[Iterable[str]]):
+        self.text_recognizer.set_char_whitelist(chars)
 
     def ocr_lines(self, img_list: List[np.ndarray]):
         rec_res, elapse = self.text_recognizer(img_list)

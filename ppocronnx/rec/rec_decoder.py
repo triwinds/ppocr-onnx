@@ -1,6 +1,9 @@
 import string
+import unicodedata
 import numpy as np
+import logging
 
+logger = logging.getLogger(__name__)
 
 class BaseRecLabelDecode(object):
     """ Convert between text-label and text-index """
@@ -89,8 +92,11 @@ class CTCLabelDecode(BaseRecLabelDecode):
                  **kwargs):
         super(CTCLabelDecode, self).__init__(character_dict,
                                              character_type, use_space_char)
+        self.char_mask = None
 
     def __call__(self, preds, label=None, *args, **kwargs):
+        if self.char_mask is not None:
+            preds[:, :, ~self.char_mask] = 0
         preds_idx = preds.argmax(axis=2)
         preds_prob = preds.max(axis=2)
         text = self.decode(preds_idx, preds_prob, is_remove_duplicate=True)
@@ -98,6 +104,22 @@ class CTCLabelDecode(BaseRecLabelDecode):
             return text
         label = self.decode(label)
         return text, label
+
+    def set_char_mask(self, chars):
+        if chars is None:
+            self.char_mask = None
+            return
+        mask = np.zeros(len(self.character), dtype=bool)
+        mask[0] = True
+        if chars is not None:
+            for c in chars:
+                if unicodedata.category(c)[0] == 'C':
+                    continue
+                if (idx := self.dict.get(c, None)) is not None:
+                    mask[idx] = True
+                else:
+                    logger.warning('attempt to whitelist character %r not present in dict', c)
+        self.char_mask = mask
 
     def add_special_char(self, dict_character):
         dict_character = ['blank'] + dict_character
