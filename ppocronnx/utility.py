@@ -11,21 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
 import math
-import os
+import pkgutil
 
 import cv2
 import numpy as np
-import requests
 from PIL import Image, ImageDraw, ImageFont
 
-if os.name == 'nt':
-    data_root = os.path.join(os.getenv('APPDATA'), 'ppocr_onnx')
-else:
-    data_root = os.path.expanduser('~/.ppocr_onnx')
-if not os.path.exists(data_root):
-    os.mkdir(data_root)
 
 
 def draw_text_det_res(dt_boxes, img_path):
@@ -270,24 +262,9 @@ def draw_boxes(image, boxes, scores=None, drop_score=0.5):
 
 
 def get_model_data(model_filename):
-    model_path = os.path.join(data_root, model_filename)
-    if not os.path.exists(model_path):
-        download_model(model_path, model_filename)
-    with open(model_path, 'rb') as f:
-        return f.read()
+    return pkgutil.get_data(__name__, 'model/' + model_filename)
 
 
-def download_model(model_path, model_filename):
-    logging.info(f'download model to {model_path}')
-    resp = requests.get(f'https://raw.fastgit.org/triwinds/ppocr-onnx/main/model/{model_filename}')
-    with open(model_path, 'wb') as f:
-        f.write(resp.content)
-
-
-def get_character_dict_path():
-    filepath = os.path.join(data_root, 'ppocr_keys_v1.txt')
-    if not os.path.exists(filepath):
-        resp = requests.get('https://raw.fastgit.org/triwinds/ppocr-onnx/main/model/ppocr_keys_v1.txt')
-        with open(filepath, 'wb') as f:
-            f.write(resp.content)
-    return filepath
+def get_character_dict():
+    data = pkgutil.get_data(__name__, 'model/ppocr_keys_v1.txt')
+    return data.decode('utf-8').splitlines()

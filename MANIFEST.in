@@ -4,5 +4,7 @@ include *.rst
 include *.txt
 include LICENSE
 
+include ppocronnx/model/*
+
 global-exclude __pycache__ *.py[cod]
 global-exclude *.so *.dylib

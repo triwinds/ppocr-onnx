@@ -19,11 +19,11 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 
-from ppocronnx.utility import get_model_data, get_character_dict_path
+from ppocronnx.utility import get_model_data, get_character_dict
 from .rec_decoder import CTCLabelDecode
 
 logger = logging
-character_dict_path = get_character_dict_path()
+character_dict = get_character_dict()
 rec_model_file = 'rec-model.onnx'
 
 
@@ -33,7 +33,7 @@ class TextRecognizer(object):
         self.character_type = 'ch'
         self.rec_batch_num = 6
         self.rec_algorithm = 'CRNN'
-        self.postprocess_op = CTCLabelDecode(character_dict_path=character_dict_path,
+        self.postprocess_op = CTCLabelDecode(character_dict=character_dict,
                                              character_type='ch', use_space_char=True)
         sess = ort.InferenceSession(get_model_data(rec_model_file))
         self.predictor, self.input_tensor = sess, sess.get_inputs()[0]

@@ -18,7 +18,7 @@ setuptools.setup(
     url="https://github.com/triwinds/ppocr-onnx",
     packages=setuptools.find_packages(),
     install_requires=requirements,
-    # include_package_data=True,
+    include_package_data=True,
     classifiers=[
         'Development Status :: 4 - Beta',
         'Operating System :: OS Independent',
