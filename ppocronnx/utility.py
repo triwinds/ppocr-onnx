@@ -265,6 +265,11 @@ def get_model_data(model_filename):
     return pkgutil.get_data(__name__, 'model/' + model_filename)
 
 
+def get_model_data_from_path(model_path):
+    with open(model_path, 'rb') as f:
+        return f.read()
+
+
 def get_character_dict():
     data = pkgutil.get_data(__name__, 'model/ppocr_keys_v1.txt')
     return data.decode('utf-8').splitlines()

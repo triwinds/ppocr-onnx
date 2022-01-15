@@ -20,7 +20,7 @@ import time
 
 import onnxruntime as ort
 import logging
-from ppocronnx.utility import get_model_data
+from ppocronnx.utility import get_model_data, get_model_data_from_path
 from .preprocess import preprocess_op
 from .postprocess import DBPostProcess
 
@@ -48,13 +48,14 @@ def transform(data, ops=None):
 
 
 class TextDetector(object):
-    def __init__(self):
+    def __init__(self, box_thresh=0.6, unclip_ratio=1.6, det_model_path=None):
         self.det_algorithm = 'DB'
 
         self.preprocess_op = preprocess_op
-        self.postprocess_op = DBPostProcess(thresh=0.3, box_thresh=0.6, max_candidates=1000, unclip_ratio=1.5,
-                                            use_dilation=True)
-        sess = ort.InferenceSession(get_model_data(model_file))
+        self.postprocess_op = DBPostProcess(thresh=0.3, box_thresh=box_thresh, max_candidates=1000,
+                                            unclip_ratio=unclip_ratio, use_dilation=True)
+        model_data = get_model_data(model_file) if det_model_path is None else get_model_data_from_path(det_model_path)
+        sess = ort.InferenceSession(model_data)
         self.output_tensors = None
         self.predictor, self.input_tensor = sess, sess.get_inputs()[0]
 
@@ -147,18 +148,3 @@ class TextDetector(object):
         dt_boxes = self.filter_tag_det_res(dt_boxes, ori_im.shape)
         elapse = time.time() - starttime
         return dt_boxes, elapse
-
-
-def main():
-    text_detector = TextDetector()
-    img = cv2.imread('test.png')
-    dt_boxes, elapse = text_detector(img)
-    print(dt_boxes)
-
-    src_im = draw_text_det_res(dt_boxes, img)
-    cv2.imshow('test', src_im)
-    cv2.waitKey()
-
-
-if __name__ == '__main__':
-    main()

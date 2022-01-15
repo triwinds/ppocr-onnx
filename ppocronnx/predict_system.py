@@ -61,9 +61,10 @@ def get_rotate_crop_image(img, points):
 
 
 class TextSystem(object):
-    def __init__(self, use_angle_cls=True):
-        self.text_detector = TextDetector()
-        self.text_recognizer = TextRecognizer()
+    def __init__(self, use_angle_cls=True, box_thresh=0.6, unclip_ratio=1.6, rec_model_path=None, det_model_path=None):
+        self.text_detector = TextDetector(box_thresh=box_thresh, unclip_ratio=unclip_ratio,
+                                          det_model_path=det_model_path)
+        self.text_recognizer = TextRecognizer(rec_model_path=rec_model_path)
         self.use_angle_cls = use_angle_cls
         if self.use_angle_cls:
             self.text_classifier = TextClassifier()
@@ -97,7 +98,6 @@ class TextSystem(object):
         logger.debug("rec_res num  : {}, elapse : {}".format(len(rec_res), elapse))
         res = []
         for box, rec_reuslt, img_crop in zip(dt_boxes, rec_res, img_crop_list):
-            print(box)
             text, score = rec_reuslt
             if score >= drop_score:
                 res.append(BoxedResult(box, img_crop, text, score))

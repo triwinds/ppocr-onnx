@@ -19,7 +19,7 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 
-from ppocronnx.utility import get_model_data, get_character_dict
+from ppocronnx.utility import get_model_data, get_character_dict, get_model_data_from_path
 from .rec_decoder import CTCLabelDecode
 
 logger = logging
@@ -28,14 +28,15 @@ rec_model_file = 'rec-model.onnx'
 
 
 class TextRecognizer(object):
-    def __init__(self):
+    def __init__(self, rec_model_path=None):
         self.rec_image_shape = [3, 32, 320]
         self.character_type = 'ch'
         self.rec_batch_num = 6
         self.rec_algorithm = 'CRNN'
         self.postprocess_op = CTCLabelDecode(character_dict=character_dict,
                                              character_type='ch', use_space_char=True)
-        sess = ort.InferenceSession(get_model_data(rec_model_file))
+        model_data = get_model_data(rec_model_file) if rec_model_path is None else get_model_data_from_path(rec_model_path)
+        sess = ort.InferenceSession(model_data)
         self.predictor, self.input_tensor = sess, sess.get_inputs()[0]
         self.output_tensors = None
 
@@ -102,14 +103,3 @@ class TextRecognizer(object):
                 rec_res[indices[beg_img_no + rno]] = rec_result[rno]
             elapse += time.time() - starttime
         return rec_res, elapse
-
-
-def main():
-    img_list = [cv2.imread('test.png')]
-    text_recognizer = TextRecognizer()
-    rec_res, predict_time = text_recognizer(img_list)
-    print(rec_res)
-
-
-if __name__ == "__main__":
-    main()
