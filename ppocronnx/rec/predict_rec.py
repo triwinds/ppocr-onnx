@@ -24,7 +24,7 @@ from .rec_decoder import CTCLabelDecode
 
 logger = logging
 character_dict = get_character_dict()
-rec_model_file = 'rec-model.onnx'
+rec_model_file = 'ch_PP-OCRv2_rec_infer.onnx'
 
 
 class TextRecognizer(object):
@@ -36,7 +36,9 @@ class TextRecognizer(object):
         self.postprocess_op = CTCLabelDecode(character_dict=character_dict,
                                              character_type='ch', use_space_char=True)
         model_data = get_model_data(rec_model_file) if rec_model_path is None else get_model_data_from_path(rec_model_path)
-        sess = ort.InferenceSession(model_data)
+        so = ort.SessionOptions()
+        so.log_severity_level = 3
+        sess = ort.InferenceSession(model_data, so)
         self.predictor, self.input_tensor = sess, sess.get_inputs()[0]
         self.output_tensors = None
 

@@ -55,7 +55,9 @@ class TextDetector(object):
         self.postprocess_op = DBPostProcess(thresh=0.3, box_thresh=box_thresh, max_candidates=1000,
                                             unclip_ratio=unclip_ratio, use_dilation=True)
         model_data = get_model_data(model_file) if det_model_path is None else get_model_data_from_path(det_model_path)
-        sess = ort.InferenceSession(model_data)
+        so = ort.SessionOptions()
+        so.log_severity_level = 3
+        sess = ort.InferenceSession(model_data, so)
         self.output_tensors = None
         self.predictor, self.input_tensor = sess, sess.get_inputs()[0]
 
