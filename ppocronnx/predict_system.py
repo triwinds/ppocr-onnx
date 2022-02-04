@@ -72,6 +72,11 @@ class TextSystem(object):
     def set_char_whitelist(self, chars: Optional[Iterable[str]]):
         self.text_recognizer.set_char_whitelist(chars)
 
+    def ocr_single_line(self, img):
+        res = self.ocr_lines([img])
+        if res:
+            return res[0]
+
     def ocr_lines(self, img_list: List[np.ndarray]):
         rec_res, elapse = self.text_recognizer(img_list)
         return rec_res

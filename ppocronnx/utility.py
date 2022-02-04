@@ -139,7 +139,22 @@ def draw_ocr_box_txt(image,
     img_show = Image.new('RGB', (w * 2, h), (255, 255, 255))
     img_show.paste(img_left, (0, 0, w, h))
     img_show.paste(img_right, (w, 0, w * 2, h))
-    return np.array(img_show)
+    return cv2.cvtColor(np.array(img_show), cv2.COLOR_RGB2BGR)
+
+
+def draw_ocr_box_result(img, boxed_result, drop_score=0.5, font_path="./doc/fonts/simfang.ttf"):
+    image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    boxes = [boxed_result.box for boxed_result in boxed_result]
+    txts = [boxed_result.ocr_text for boxed_result in boxed_result]
+    scores = [boxed_result.score for boxed_result in boxed_result]
+
+    return draw_ocr_box_txt(
+        image,
+        boxes,
+        txts,
+        scores,
+        drop_score=drop_score,
+        font_path=font_path)
 
 
 def str_count(s):

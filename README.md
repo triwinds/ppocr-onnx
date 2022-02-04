@@ -32,6 +32,10 @@ import cv2
 text_sys = TextSystem()
 
 # 识别单行文本
+res = text_sys.ocr_single_line(cv2.imread('single_line_text.png'))
+print(res)
+
+# 批量识别单行文本
 res = text_sys.ocr_lines([cv2.imread('single_line_text.png')])
 print(res[0])
 
