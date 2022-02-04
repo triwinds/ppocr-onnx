@@ -11,16 +11,12 @@ class DBPostProcess(object):
 
     def __init__(self,
                  thresh=0.3,
-                 box_thresh=0.7,
                  max_candidates=1000,
-                 unclip_ratio=2.0,
                  use_dilation=False,
                  score_mode="fast",
                  **kwargs):
         self.thresh = thresh
-        self.box_thresh = box_thresh
         self.max_candidates = max_candidates
-        self.unclip_ratio = unclip_ratio
         self.min_size = 3
         self.score_mode = score_mode
         assert score_mode in [
@@ -30,7 +26,7 @@ class DBPostProcess(object):
         self.dilation_kernel = None if not use_dilation else np.array(
             [[1, 1], [1, 1]])
 
-    def boxes_from_bitmap(self, pred, _bitmap, dest_width, dest_height):
+    def boxes_from_bitmap(self, pred, _bitmap, dest_width, dest_height, unclip_ratio, box_thresh):
         '''
         _bitmap: single map with shape (1, H, W),
                 whose values are binarized as {0, 1}
@@ -60,10 +56,10 @@ class DBPostProcess(object):
                 score = self.box_score_fast(pred, points.reshape(-1, 2))
             else:
                 score = self.box_score_slow(pred, contour)
-            if self.box_thresh > score:
+            if box_thresh > score:
                 continue
 
-            box = self.unclip(points).reshape(-1, 1, 2)
+            box = self.unclip(points, unclip_ratio).reshape(-1, 1, 2)
             box, sside = self.get_mini_boxes(box)
             if sside < self.min_size + 2:
                 continue
@@ -77,8 +73,7 @@ class DBPostProcess(object):
             scores.append(score)
         return np.array(boxes, dtype=np.int16), scores
 
-    def unclip(self, box):
-        unclip_ratio = self.unclip_ratio
+    def unclip(self, box, unclip_ratio):
         poly = Polygon(box)
         distance = poly.area * unclip_ratio / poly.length
         offset = pyclipper.PyclipperOffset()
@@ -147,7 +142,7 @@ class DBPostProcess(object):
         cv2.fillPoly(mask, contour.reshape(1, -1, 2).astype(np.int32), 1)
         return cv2.mean(bitmap[ymin:ymax + 1, xmin:xmax + 1], mask)[0]
 
-    def __call__(self, outs_dict, shape_list):
+    def __call__(self, outs_dict, shape_list, unclip_ratio, box_thresh):
         pred = outs_dict['maps']
         pred = pred[:, 0, :, :]
         segmentation = pred > self.thresh
@@ -162,7 +157,7 @@ class DBPostProcess(object):
             else:
                 mask = segmentation[batch_index]
             boxes, scores = self.boxes_from_bitmap(pred[batch_index], mask,
-                                                   src_w, src_h)
+                                                   src_w, src_h, unclip_ratio, box_thresh)
 
             boxes_batch.append({'points': boxes})
         return boxes_batch

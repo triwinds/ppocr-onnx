@@ -50,10 +50,11 @@ def transform(data, ops=None):
 class TextDetector(object):
     def __init__(self, box_thresh=0.6, unclip_ratio=1.6, det_model_path=None):
         self.det_algorithm = 'DB'
+        self.box_thresh = box_thresh
+        self.unclip_ratio = unclip_ratio
 
         self.preprocess_op = preprocess_op
-        self.postprocess_op = DBPostProcess(thresh=0.3, box_thresh=box_thresh, max_candidates=1000,
-                                            unclip_ratio=unclip_ratio, use_dilation=True)
+        self.postprocess_op = DBPostProcess(thresh=0.3, max_candidates=1000, use_dilation=True)
         model_data = get_model_data(model_file) if det_model_path is None else get_model_data_from_path(det_model_path)
         so = ort.SessionOptions()
         so.log_severity_level = 3
@@ -114,7 +115,11 @@ class TextDetector(object):
         dt_boxes = np.array(dt_boxes_new)
         return dt_boxes
 
-    def __call__(self, img):
+    def __call__(self, img, unclip_ratio=None, box_thresh=None):
+        if unclip_ratio is None:
+            unclip_ratio = self.unclip_ratio
+        if box_thresh is None:
+            box_thresh = self.box_thresh
         ori_im = img.copy()
         data = {'image': img}
         data = transform(data, self.preprocess_op)
@@ -145,7 +150,7 @@ class TextDetector(object):
         else:
             raise NotImplementedError
 
-        post_result = self.postprocess_op(preds, shape_list)
+        post_result = self.postprocess_op(preds, shape_list, unclip_ratio, box_thresh)
         dt_boxes = post_result[0]['points']
         dt_boxes = self.filter_tag_det_res(dt_boxes, ori_im.shape)
         elapse = time.time() - starttime

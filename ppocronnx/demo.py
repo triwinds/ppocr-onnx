@@ -11,7 +11,7 @@ def main():
     print(text_sys.ocr_single_line(cv2.imread('test3.png')))
     img = cv2.imread('test.png')
     img = cv2.resize(img, (0, 0), fx=1.5, fy=1.5, interpolation=cv2.INTER_LINEAR)
-    res = text_sys.detect_and_ocr(img)
+    res = text_sys.detect_and_ocr(img, box_thresh=0.5, unclip_ratio=2)
     for boxed_result in res:
         print("{}, {:.3f}".format(boxed_result.ocr_text, boxed_result.score))
 

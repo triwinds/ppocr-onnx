@@ -81,9 +81,9 @@ class TextSystem(object):
         rec_res, elapse = self.text_recognizer(img_list)
         return rec_res
 
-    def detect_and_ocr(self, img: np.ndarray, drop_score=0.5):
+    def detect_and_ocr(self, img: np.ndarray, drop_score=0.5, unclip_ratio=None, box_thresh=None):
         ori_im = img.copy()
-        dt_boxes, elapse = self.text_detector(img)
+        dt_boxes, elapse = self.text_detector(img, unclip_ratio, box_thresh)
         logger.debug("dt_boxes num : {}, elapse : {}".format(len(dt_boxes), elapse))
         if dt_boxes is None:
             return []
