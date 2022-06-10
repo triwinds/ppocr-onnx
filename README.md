@@ -7,7 +7,7 @@
 
 ### 使用模型
 
- - 文字检测: `ch_PP-OCRv2_det_infer`
+ - 文字检测: `ch_PP-OCRv3_det_infer`
  - 方向分类: `cls mobile v2`
  - 文字识别: `ch_PP-OCRv2_rec_infer`
 
@@ -15,7 +15,7 @@
 
  - [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)
  - [手把手教你使用ONNXRunTime部署PP-OCR](https://aistudio.baidu.com/aistudio/projectdetail/1479970)
- - `ch_PP-OCRv2_det_infer` 及 `ch_PP-OCRv2_rec_infer` 模型来自 [RapidAI/RapidOCR](https://github.com/RapidAI/RapidOCR)
+ - `ch_PP-OCRv3_det_infer` 及 `ch_PP-OCRv2_rec_infer` 模型来自 [RapidAI/RapidOCR](https://github.com/RapidAI/RapidOCR)
 
 ## 安装
 

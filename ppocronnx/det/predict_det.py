@@ -25,7 +25,7 @@ from .preprocess import preprocess_op
 from .postprocess import DBPostProcess
 
 logger = logging
-model_file = 'ch_PP-OCRv2_det_infer.onnx'
+model_file = 'ch_PP-OCRv3_det_infer.onnx'
 
 
 def draw_text_det_res(dt_boxes, img):
