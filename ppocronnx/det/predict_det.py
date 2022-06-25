@@ -58,7 +58,7 @@ class TextDetector(object):
         model_data = get_model_data(model_file) if det_model_path is None else get_model_data_from_path(det_model_path)
         so = ort.SessionOptions()
         so.log_severity_level = 3
-        sess = ort.InferenceSession(model_data, so)
+        sess = ort.InferenceSession(model_data, so, providers=['CPUExecutionProvider'])
         self.output_tensors = None
         self.predictor, self.input_tensor = sess, sess.get_inputs()[0]
 
