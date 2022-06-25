@@ -38,7 +38,7 @@ class TextRecognizer(object):
         model_data = get_model_data(rec_model_file) if rec_model_path is None else get_model_data_from_path(rec_model_path)
         so = ort.SessionOptions()
         so.log_severity_level = 3
-        sess = ort.InferenceSession(model_data, so)
+        sess = ort.InferenceSession(model_data, so, providers=['CPUExecutionProvider'])
         self.predictor, self.input_tensor = sess, sess.get_inputs()[0]
         self.output_tensors = None
 

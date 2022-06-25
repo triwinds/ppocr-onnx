@@ -33,7 +33,7 @@ class TextClassifier(object):
         self.cls_thresh = cls_thresh
         self.postprocess_op = ClsPostProcess(label_list=label_list)
         self.output_tensors = None
-        sess = ort.InferenceSession(get_model_data(model_file))
+        sess = ort.InferenceSession(get_model_data(model_file), providers=['CPUExecutionProvider'])
         self.predictor, self.input_tensor = sess, sess.get_inputs()[0]
 
     def resize_norm_img(self, img):
