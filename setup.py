@@ -8,7 +8,7 @@ with open('requirements.txt', 'r', encoding='utf-8') as f:
 
 setuptools.setup(
     name="ppocr-onnx",
-    version="0.0.3.7",
+    version="0.0.3.8",
     author="triwinds",
     author_email="triwinds@foxmail.com",
     license='Apache 2.0',
