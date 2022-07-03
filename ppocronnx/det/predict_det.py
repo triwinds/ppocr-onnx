@@ -48,7 +48,9 @@ def transform(data, ops=None):
 
 
 class TextDetector(object):
-    def __init__(self, box_thresh=0.6, unclip_ratio=1.6, det_model_path=None):
+    def __init__(self, box_thresh=0.6, unclip_ratio=1.6, det_model_path=None, ort_providers=None):
+        if ort_providers is None:
+            ort_providers = ['CPUExecutionProvider']
         self.det_algorithm = 'DB'
         self.box_thresh = box_thresh
         self.unclip_ratio = unclip_ratio
@@ -58,7 +60,7 @@ class TextDetector(object):
         model_data = get_model_data(model_file) if det_model_path is None else get_model_data_from_path(det_model_path)
         so = ort.SessionOptions()
         so.log_severity_level = 3
-        sess = ort.InferenceSession(model_data, so, providers=['CPUExecutionProvider'])
+        sess = ort.InferenceSession(model_data, so, providers=ort_providers)
         self.output_tensors = None
         self.predictor, self.input_tensor = sess, sess.get_inputs()[0]
 

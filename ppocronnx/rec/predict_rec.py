@@ -28,7 +28,9 @@ rec_model_file = 'ch_PP-OCRv2_rec_infer.onnx'
 
 
 class TextRecognizer(object):
-    def __init__(self, rec_model_path=None):
+    def __init__(self, rec_model_path=None, ort_providers=None):
+        if ort_providers is None:
+            ort_providers = ['CPUExecutionProvider']
         self.rec_image_shape = [3, 32, 320]
         self.character_type = 'ch'
         self.rec_batch_num = 6
@@ -38,7 +40,7 @@ class TextRecognizer(object):
         model_data = get_model_data(rec_model_file) if rec_model_path is None else get_model_data_from_path(rec_model_path)
         so = ort.SessionOptions()
         so.log_severity_level = 3
-        sess = ort.InferenceSession(model_data, so, providers=['CPUExecutionProvider'])
+        sess = ort.InferenceSession(model_data, so, providers=ort_providers)
         self.predictor, self.input_tensor = sess, sess.get_inputs()[0]
         self.output_tensors = None
 

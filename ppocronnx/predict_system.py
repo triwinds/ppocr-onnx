@@ -61,13 +61,14 @@ def get_rotate_crop_image(img, points):
 
 
 class TextSystem(object):
-    def __init__(self, use_angle_cls=True, box_thresh=0.6, unclip_ratio=1.6, rec_model_path=None, det_model_path=None):
+    def __init__(self, use_angle_cls=True, box_thresh=0.6, unclip_ratio=1.6, rec_model_path=None, det_model_path=None,
+                 ort_providers=None):
         self.text_detector = TextDetector(box_thresh=box_thresh, unclip_ratio=unclip_ratio,
-                                          det_model_path=det_model_path)
-        self.text_recognizer = TextRecognizer(rec_model_path=rec_model_path)
+                                          det_model_path=det_model_path, ort_providers=ort_providers)
+        self.text_recognizer = TextRecognizer(rec_model_path=rec_model_path, ort_providers=ort_providers)
         self.use_angle_cls = use_angle_cls
         if self.use_angle_cls:
-            self.text_classifier = TextClassifier()
+            self.text_classifier = TextClassifier(ort_providers=ort_providers)
 
     def set_char_whitelist(self, chars: Optional[Iterable[str]]):
         self.text_recognizer.set_char_whitelist(chars)

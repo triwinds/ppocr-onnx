@@ -27,13 +27,15 @@ model_file = 'cls-model.onnx'
 
 
 class TextClassifier(object):
-    def __init__(self, label_list=('0', '180'), cls_batch_num=6, cls_thresh=0.9):
+    def __init__(self, label_list=('0', '180'), cls_batch_num=6, cls_thresh=0.9, ort_providers=None):
+        if ort_providers is None:
+            ort_providers = ['CPUExecutionProvider']
         self.cls_image_shape = [3, 48, 192]
         self.cls_batch_num = cls_batch_num
         self.cls_thresh = cls_thresh
         self.postprocess_op = ClsPostProcess(label_list=label_list)
         self.output_tensors = None
-        sess = ort.InferenceSession(get_model_data(model_file), providers=['CPUExecutionProvider'])
+        sess = ort.InferenceSession(get_model_data(model_file), providers=ort_providers)
         self.predictor, self.input_tensor = sess, sess.get_inputs()[0]
 
     def resize_norm_img(self, img):
