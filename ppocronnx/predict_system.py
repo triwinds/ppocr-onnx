@@ -78,7 +78,13 @@ class TextSystem(object):
             return res[0]
 
     def ocr_lines(self, img_list: List[np.ndarray]):
-        rec_res, elapse = self.text_recognizer(img_list)
+        tmp_img_list = []
+        for img in img_list:
+            img_height, img_width = img.shape[0:2]
+            if img_height * 1.0 / img_width >= 1.5:
+                img = np.rot90(img)
+            tmp_img_list.append(img)
+        rec_res, elapse = self.text_recognizer(tmp_img_list)
         return rec_res
 
     def detect_and_ocr(self, img: np.ndarray, drop_score=0.5, unclip_ratio=None, box_thresh=None):
