@@ -115,7 +115,8 @@ class CTCLabelDecode(BaseRecLabelDecode):
             for c in chars:
                 if unicodedata.category(c)[0] == 'C':
                     continue
-                if (idx := self.dict.get(c, None)) is not None:
+                idx = self.dict.get(c, None)
+                if idx is not None:
                     mask[idx] = True
                 else:
                     logger.warning('attempt to whitelist character %r not present in dict', c)
