@@ -6,6 +6,8 @@ with open("README.md", "r", encoding='utf-8') as fh:
 with open('requirements.txt', 'r', encoding='utf-8') as f:
     requirements = f.readlines()
 
+packages = setuptools.find_packages() + ['ppocronnx.model']
+
 setuptools.setup(
     name="ppocr-onnx",
     version="0.0.3.9",
@@ -16,7 +18,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/triwinds/ppocr-onnx",
-    packages=setuptools.find_packages(),
+    packages=packages,
     install_requires=requirements,
     include_package_data=True,
     classifiers=[
